@@ -7,7 +7,25 @@
 		<key>Currencies.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>0</integer>
+			<integer>13</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>989F01A120E4F6E400124EBD</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>989F01B520E4F6E400124EBD</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>989F01C020E4F6E400124EBD</key>
+		<dict>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>
