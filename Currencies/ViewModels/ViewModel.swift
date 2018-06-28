@@ -10,7 +10,7 @@ import RxDataSources
 
 class ViewModel{
 
-    private var currencies :  [Currency]
+     var currencies :  [Currency]
     
     init(currencies: [Currency]) {
         self.currencies = currencies
@@ -23,8 +23,12 @@ class ViewModel{
     var dataSource : RxTableViewSectionedAnimatedDataSource<SectionModel>{
         return RxTableViewSectionedAnimatedDataSource<SectionModel>(
             configureCell: { ds,tv,ip,item  in
-            let cell = tv.dequeueReusableCell(withIdentifier: "cell", for: ip)
-            cell.textLabel?.text = item.name
+                let cell = tv.dequeueReusableCell(withIdentifier: "cell", for: ip) as! CurrencyCell
+            cell.title.text = item.name
+            cell.value.text = String(item.value)
+            cell.img.image =  UIImage(named: item.name)
+            cell.subtitle.text = "foo"
+            cell.selectionStyle = .none
             return cell
         })
     }

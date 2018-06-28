@@ -15,30 +15,47 @@ import RxCocoa
 class ViewController: UIViewController {
 
     let bag = DisposeBag()
-    private var tableVeiw : UITableView!
+    private var tableView : UITableView!
     var viewModel : ViewModel!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupUI()
-        viewModel = ViewModel(currencies: [Currency(name: "test1", value: 23.46),Currency(name: "test2", value: 23.46),
-                                           Currency(name: "test3", value: 25.46),Currency(name: "test4", value: 22.46)])
+        viewModel = ViewModel(currencies: [Currency(name: "EUR", value: 23.46),Currency(name: "CZK", value: 23.46),
+                                           Currency(name: "USD", value: 25.46),Currency(name: "AUD", value: 22.46)])
         
-        Observable.just(viewModel.sections).bind(to: tableVeiw.rx.items(dataSource: viewModel.dataSource))
+        Observable.just(viewModel.sections)
+            .bind(to: tableView.rx.items(dataSource: viewModel.dataSource))
             .disposed(by: bag)
+  
+        tableView.delegate = self
+
+        
+        tableView.rx.modelSelected(Currency.self).subscribe{ element in
+            if let element = element.element, let row = self.viewModel.currencies.index(of: element){
+                let indexPath = IndexPath(row: row, section: 0)
+                self.tableView.beginUpdates()
+                self.tableView.moveRow(at: indexPath, to: IndexPath(row: 0, section: 0))
+                self.tableView.endUpdates()
+                let cell = self.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? CurrencyCell
+                cell?.value.becomeFirstResponder()
+            }
+            }.disposed(by: bag)
+ 
     }
     
     func setupUI() {
-        tableVeiw = UITableView()
-        tableVeiw.register(CurrencyCell.self, forCellReuseIdentifier: "cell")
-        view.addSubview(tableVeiw)
+        tableView = UITableView()
+        tableView.register(CurrencyCell.self, forCellReuseIdentifier: "cell")
+        view.addSubview(tableView)
         
         makeConstraints()
     }
     
     func makeConstraints(){
-        tableVeiw.snp.makeConstraints { make in
+        tableView.snp.makeConstraints { make in
             make.top.bottom.right.left.equalTo(view)
         }
     }
@@ -48,7 +65,12 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
+}
 
+extension ViewController : UITableViewDelegate{
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 80
+    }
 }
 
 
