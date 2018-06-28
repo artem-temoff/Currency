@@ -23,27 +23,48 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         setupUI()
+        /*
         viewModel = ViewModel(currencies: [Currency(name: "EUR", value: 23.46),Currency(name: "CZK", value: 23.46),
                                            Currency(name: "USD", value: 25.46),Currency(name: "AUD", value: 22.46)])
+ */
+        viewModel = ViewModel()
+        viewModel?.datasource.configureCell = { ds,tv,ip,item  in
+            let cell = tv.dequeueReusableCell(withIdentifier: "cell", for: ip) as! CurrencyCell
+            cell.title.text = item.name
+            cell.value.text = String(item.value)
+            cell.img.image =  UIImage(named: item.name)
+            cell.subtitle.text = "foo"
+            cell.selectionStyle = .none
+            return cell
+        }
         
+        if let ds = viewModel?.datasource {
+            viewModel.currencies.asObservable()
+                .map({ [SectionModel(header:"1",items:$0)] })
+                .bind(to: tableView.rx.items(dataSource: ds))
+                .disposed(by: bag)
+        }
+        /*
         Observable.just(viewModel.sections)
-            .bind(to: tableView.rx.items(dataSource: viewModel.dataSource))
+            .bind(to: tableView.rx.items(dataSource: viewModel.datasource))
             .disposed(by: bag)
-  
+  */
         tableView.delegate = self
 
-        
+        /*
         tableView.rx.modelSelected(Currency.self).subscribe{ element in
             if let element = element.element, let row = self.viewModel.currencies.index(of: element){
                 let indexPath = IndexPath(row: row, section: 0)
-                self.tableView.beginUpdates()
-                self.tableView.moveRow(at: indexPath, to: IndexPath(row: 0, section: 0))
-                self.tableView.endUpdates()
+                DispatchQueue.main.async {
+                    self.tableView.beginUpdates()
+                    self.tableView.moveRow(at: indexPath, to: IndexPath(row: 0, section: 0))
+                    self.tableView.endUpdates()
+                }
                 let cell = self.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? CurrencyCell
                 cell?.value.becomeFirstResponder()
             }
             }.disposed(by: bag)
- 
+ */
     }
     
     func setupUI() {

@@ -22,6 +22,7 @@
 		989F01D720E5058000124EBD /* Currency.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989F01D620E5058000124EBD /* Currency.swift */; };
 		989F01D920E5072E00124EBD /* ModelTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989F01D820E5072E00124EBD /* ModelTest.swift */; };
 		989F01DB20E5275F00124EBD /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989F01DA20E5275F00124EBD /* ViewModel.swift */; };
+		ACFA87BF20E57446009DE25A /* ApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFA87BE20E57446009DE25A /* ApiService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,6 +66,7 @@
 		989F01D620E5058000124EBD /* Currency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Currency.swift; sourceTree = "<group>"; };
 		989F01D820E5072E00124EBD /* ModelTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTest.swift; sourceTree = "<group>"; };
 		989F01DA20E5275F00124EBD /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
+		ACFA87BE20E57446009DE25A /* ApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiService.swift; sourceTree = "<group>"; };
 		BDF8DDC03D2F7D35D60E6424 /* Pods-Currencies.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Currencies.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Currencies/Pods-Currencies.debug.xcconfig"; sourceTree = "<group>"; };
 		C11FDBA5C2A62D0235F2DE8A /* Pods_CurrenciesTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CurrenciesTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCA294CE82B51DEA777C614A /* Pods-CurrenciesUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CurrenciesUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-CurrenciesUITests/Pods-CurrenciesUITests.release.xcconfig"; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 				989F01AC20E4F6E400124EBD /* Assets.xcassets */,
 				989F01AE20E4F6E400124EBD /* LaunchScreen.storyboard */,
 				989F01B120E4F6E400124EBD /* Info.plist */,
+				ACFA87BE20E57446009DE25A /* ApiService.swift */,
 			);
 			path = Currencies;
 			sourceTree = "<group>";
@@ -525,6 +528,7 @@
 			files = (
 				98037FD320E536C900D3FBAE /* CurrencyCell.swift in Sources */,
 				989F01D720E5058000124EBD /* Currency.swift in Sources */,
+				ACFA87BF20E57446009DE25A /* ApiService.swift in Sources */,
 				989F01A820E4F6E400124EBD /* ViewController.swift in Sources */,
 				989F01DB20E5275F00124EBD /* ViewModel.swift in Sources */,
 				98037FD020E535D100D3FBAE /* SectionModel.swift in Sources */,
