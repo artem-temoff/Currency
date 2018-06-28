@@ -23,10 +23,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         setupUI()
-        /*
-        viewModel = ViewModel(currencies: [Currency(name: "EUR", value: 23.46),Currency(name: "CZK", value: 23.46),
-                                           Currency(name: "USD", value: 25.46),Currency(name: "AUD", value: 22.46)])
- */
+
         viewModel = ViewModel()
         viewModel?.datasource.configureCell = { ds,tv,ip,item  in
             let cell = tv.dequeueReusableCell(withIdentifier: "cell", for: ip) as! CurrencyCell
@@ -44,16 +41,12 @@ class ViewController: UIViewController {
                 .bind(to: tableView.rx.items(dataSource: ds))
                 .disposed(by: bag)
         }
-        /*
-        Observable.just(viewModel.sections)
-            .bind(to: tableView.rx.items(dataSource: viewModel.datasource))
-            .disposed(by: bag)
-  */
+
         tableView.delegate = self
 
-        /*
+        
         tableView.rx.modelSelected(Currency.self).subscribe{ element in
-            if let element = element.element, let row = self.viewModel.currencies.index(of: element){
+            if let element = element.element, let row = self.viewModel.currencies.value.index(of: element){
                 let indexPath = IndexPath(row: row, section: 0)
                 DispatchQueue.main.async {
                     self.tableView.beginUpdates()
@@ -64,7 +57,7 @@ class ViewController: UIViewController {
                 cell?.value.becomeFirstResponder()
             }
             }.disposed(by: bag)
- */
+ 
     }
     
     func setupUI() {

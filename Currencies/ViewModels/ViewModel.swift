@@ -30,7 +30,6 @@ class ViewModel{
     
     init() {
         fethCurrencies()
-        //self.currencies = Variable<[Currency]>(currencies)
     }
     
     func fethCurrencies(){
@@ -39,7 +38,6 @@ class ViewModel{
             if (response.statusCode == 200){
                 if let document = try? response.mapObject(CurrencyResponse.self){
                     self.currencies.value = document.rates
-                    print("all OK")
                 } else {
                     print("Can't make document")
                 }
@@ -50,22 +48,5 @@ class ViewModel{
             print("error")
         }.disposed(by: bag)
     }
-    
-    var sections : [SectionModel] {
-        return [SectionModel(header: "Currencies", items: currencies.value)]
-    }
-    /*
-    var dataSource : RxTableViewSectionedAnimatedDataSource<SectionModel>{
-        return RxTableViewSectionedAnimatedDataSource<SectionModel>(
-            configureCell: { ds,tv,ip,item  in
-                let cell = tv.dequeueReusableCell(withIdentifier: "cell", for: ip) as! CurrencyCell
-            cell.title.text = item.name
-            cell.value.text = String(item.value)
-            cell.img.image =  UIImage(named: item.name)
-            cell.subtitle.text = "foo"
-            cell.selectionStyle = .none
-            return cell
-        })
-    }
- */
+
 }

@@ -17,7 +17,6 @@ struct Currency {
         self.name = name
         self.value = value
     }
-    
 }
 
 struct CurrencyResponse : Mappable {
