@@ -10,7 +10,7 @@ import Moya
 
 
 enum ApiService{
-    case fetch(String)
+    case fetch(String,String)
 }
 
 extension ApiService : TargetType{
@@ -39,8 +39,8 @@ extension ApiService : TargetType{
     
     var parameters : [String:Any]?{
         switch self {
-        case .fetch(let base):
-            return ["base":base]
+        case .fetch(let base,let amount):
+            return ["base":base,"amount":amount]
         }
     }
 }

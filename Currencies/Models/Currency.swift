@@ -7,15 +7,16 @@
 //
 
 import ObjectMapper
+import RxSwift
 
 struct Currency {
     
     var name : String
-    var value : Double
+    var value = Variable<String>("")
     
     init(name: String,value : Double) {
         self.name = name
-        self.value = value
+        self.value.value = "\(value)"
     }
 }
 
@@ -37,7 +38,9 @@ struct CurrencyResponse : Mappable {
         rates =  item.flatMap { (key, value) -> Currency? in
             return Currency(name: key, value: value)
         }
-
+        rates.sort { (lhr, rhr) -> Bool in
+            return lhr.name < rhr.name
+        }
     }
     
     mutating func mapping(map: Map) {

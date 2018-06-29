@@ -15,29 +15,28 @@ class ViewModel{
 
     let bag = DisposeBag()
     var currencies : Variable<[Currency]> = Variable<[Currency]>([])
+    var base : Variable<String> = Variable<String>("EUR")
+    var value = Variable<Double>(1)
     
-    var datasource = RxTableViewSectionedAnimatedDataSource<SectionModel>(configureCell: { ds,tv,ip,item  in
-        let cell = tv.dequeueReusableCell(withIdentifier: "cell", for: ip) as! CurrencyCell
-        cell.title.text = item.name
-        cell.value.text = String(item.value)
-        cell.img.image =  UIImage(named: item.name)
-        cell.subtitle.text = "foo"
-        cell.selectionStyle = .none
-        return cell
+    var datasource = RxTableViewSectionedAnimatedDataSource<SectionModel>(configureCell: { (_,_,_,_) in
+        return UITableViewCell()
     })
-        
-   // lazy var itemsObservable : Observable<[Currency]> = self.currencies.asObservable()
     
     init() {
-        fethCurrencies()
+
+        Observable<Int>.interval(5, scheduler: MainScheduler.instance).subscribe{ _ in
+            self.fethCurrencies(base: self.base.value)
+        }.disposed(by: bag)
+        
     }
     
-    func fethCurrencies(){
+    func fethCurrencies(base : String){
         let provider = MoyaProvider<ApiService>()
-        provider.rx.request(.fetch("EUR")).subscribe(onSuccess: { (response) in
+        provider.rx.request(.fetch(base,String(value.value)))
+            .subscribe(onSuccess: { (response) in
             if (response.statusCode == 200){
                 if let document = try? response.mapObject(CurrencyResponse.self){
-                    self.currencies.value = document.rates
+                    self.processItems([Currency(name:base,value: self.value.value)] + document.rates)
                 } else {
                     print("Can't make document")
                 }
@@ -49,4 +48,18 @@ class ViewModel{
         }.disposed(by: bag)
     }
 
+    func processItems(_ newItems: [Currency]){
+        for value in newItems{
+            if let index = self.currencies.value.index(of: value){
+                if (self.currencies.value[index].name.elementsEqual(base.value)){
+                    // TODO fix numbers after point in double string
+                    self.currencies.value[index].value.value = "\(self.value.value)"
+                    continue
+                }
+                self.currencies.value[index].value.value = value.value.value
+            }else {
+                self.currencies.value.append(value)
+            }
+        }
+    }
 }

@@ -15,9 +15,10 @@ import RxCocoa
 class ViewController: UIViewController {
 
     let bag = DisposeBag()
+    var tmpBug : DisposeBag? = DisposeBag()
     private var tableView : UITableView!
     var viewModel : ViewModel!
-    
+    var subscription : Disposable?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,7 +29,7 @@ class ViewController: UIViewController {
         viewModel?.datasource.configureCell = { ds,tv,ip,item  in
             let cell = tv.dequeueReusableCell(withIdentifier: "cell", for: ip) as! CurrencyCell
             cell.title.text = item.name
-            cell.value.text = String(item.value)
+            item.value.asObservable().bind(to: cell.value.rx.text).disposed(by: self.bag)
             cell.img.image =  UIImage(named: item.name)
             cell.subtitle.text = "foo"
             cell.selectionStyle = .none
@@ -37,27 +38,37 @@ class ViewController: UIViewController {
         
         if let ds = viewModel?.datasource {
             viewModel.currencies.asObservable()
-                .map({ [SectionModel(header:"1",items:$0)] })
+                .map({ [SectionModel(header:"",items:$0)] })
                 .bind(to: tableView.rx.items(dataSource: ds))
                 .disposed(by: bag)
         }
 
         tableView.delegate = self
-
         
-        tableView.rx.modelSelected(Currency.self).subscribe{ element in
+        tableView.rx.modelSelected(Currency.self)
+            .subscribe{ element in
             if let element = element.element, let row = self.viewModel.currencies.value.index(of: element){
-                let indexPath = IndexPath(row: row, section: 0)
+               let cell = (self.tableView?.cellForRow(at: IndexPath(row: row, section: 0)) as! CurrencyCell)
+                self.subscription = cell.value.rx.text.subscribe( onNext : { t in
+                    if let el = t, let d = Double(el){
+                        self.viewModel.value.value = d
+                    }
+                })
+               cell.value.becomeFirstResponder()
+               self.viewModel.currencies.value.swapAt(0, row)
+               self.viewModel.base.value = self.viewModel.currencies.value[0].name
                 DispatchQueue.main.async {
-                    self.tableView.beginUpdates()
-                    self.tableView.moveRow(at: indexPath, to: IndexPath(row: 0, section: 0))
-                    self.tableView.endUpdates()
+                    self.tableView.scrollToRow(at: IndexPath(row:0,section:0), at: UITableViewScrollPosition.top, animated: true)
                 }
-                let cell = self.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? CurrencyCell
-                cell?.value.becomeFirstResponder()
             }
             }.disposed(by: bag)
- 
+        
+        
+        tableView.rx.modelDeselected(Currency.self)
+        .subscribe{ element in
+            self.subscription?.dispose()
+        }.disposed(by: bag)
+        
     }
     
     func setupUI() {
