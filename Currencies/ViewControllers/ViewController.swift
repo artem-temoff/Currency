@@ -24,14 +24,18 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         setupUI()
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        
 
         viewModel = ViewModel()
         viewModel?.datasource.configureCell = { ds,tv,ip,item  in
             let cell = tv.dequeueReusableCell(withIdentifier: "cell", for: ip) as! CurrencyCell
             cell.title.text = item.name
             item.value.asObservable().bind(to: cell.value.rx.text).disposed(by: self.bag)
+            cell.value.delegate = self
             cell.img.image =  UIImage(named: item.name)
-            cell.subtitle.text = "foo"
+            cell.subtitle.text = self.viewModel.symbols?[item.name] ?? ""
             cell.selectionStyle = .none
             return cell
         }
@@ -49,9 +53,10 @@ class ViewController: UIViewController {
             .subscribe{ element in
             if let element = element.element, let row = self.viewModel.currencies.value.index(of: element){
                let cell = (self.tableView?.cellForRow(at: IndexPath(row: row, section: 0)) as! CurrencyCell)
-                self.subscription = cell.value.rx.text.subscribe( onNext : { t in
-                    if let el = t, let d = Double(el){
-                        self.viewModel.value.value = d
+                self.subscription = cell.value.rx.text
+                    .subscribe( onNext : { element in
+                    if let element = element{
+                        self.viewModel.value.value = element
                     }
                 })
                cell.value.becomeFirstResponder()
@@ -89,12 +94,37 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    @objc func keyboardWillShow(notification: NSNotification) {
+        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+            tableView.contentInset.bottom = keyboardSize.height
+        }
+    }
+    
+    @objc func keyboardWillHide(notification: NSNotification) {
+        tableView.contentInset.bottom = 0
+    }
 
 }
 
 extension ViewController : UITableViewDelegate{
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 80
+    }
+}
+
+extension ViewController : UITextFieldDelegate{
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        if let text = textField.text, text.count > 1{
+            if (text.contains(".") && string.contains(".")){
+                return false
+            }
+        }
+        return true
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        textField.sizeToFit()
     }
 }
 

@@ -40,6 +40,7 @@ class CurrencyCell: UITableViewCell {
         value.placeholder = "0"
         value.textAlignment = .right
         contentView.addSubview(value)
+        
     }
     
     private func makeConstraints(){
@@ -61,10 +62,12 @@ class CurrencyCell: UITableViewCell {
          
          value.snp.makeConstraints{ make in
             make.height.equalTo(18)
-            make.width.equalTo(60)
+           // make.width.equalTo(60)
             make.trailing.equalTo(contentView).offset(-15)
             make.centerY.equalTo(contentView)
          }
     }
     
 }
+
+

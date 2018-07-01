@@ -14,9 +14,9 @@ struct Currency {
     var name : String
     var value = Variable<String>("")
     
-    init(name: String,value : Double) {
+    init(name: String,value : String) {
         self.name = name
-        self.value.value = "\(value)"
+        self.value.value = value
     }
 }
 
@@ -36,7 +36,7 @@ struct CurrencyResponse : Mappable {
         self.base = base
         self.date = date
         rates =  item.flatMap { (key, value) -> Currency? in
-            return Currency(name: key, value: value)
+            return Currency(name: key, value: String(value))
         }
         rates.sort { (lhr, rhr) -> Bool in
             return lhr.name < rhr.name
