@@ -24,8 +24,7 @@ class ViewModel{
     })
     
     init() {
-        loadSymbols()
-        print(symbols?.count)
+        symbols = loadSymbols()
         let timerSeq = Observable<Int>.timer(0, period: 5, scheduler: MainScheduler.instance).map { $0 as AnyObject }
         let variableSeq = value.asObservable().throttle(0.5, scheduler: MainScheduler.instance).map { $0 as AnyObject }
         Observable<AnyObject>.merge([timerSeq,variableSeq])
@@ -67,12 +66,13 @@ class ViewModel{
         }
     }
     
-    func loadSymbols(){
+    func loadSymbols() -> Dictionary<String, String>{
         if let path = Bundle.main.path(forResource: "symbols", ofType: "plist"),
             let dict = NSDictionary(contentsOfFile: path),
             let dictionary = dict as? Dictionary<String, String>{
-            symbols = dictionary
+                return dictionary
         }
+        return [:]
     }
 }
 
