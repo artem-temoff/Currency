@@ -13,7 +13,6 @@ import Moya_ObjectMapper
 
 class ViewModel{
 
-    var symbols : [String:String]?
     let bag = DisposeBag()
     var currencies : Variable<[Currency]> = Variable<[Currency]>([])
     var base : Variable<String> = Variable<String>("EUR")
@@ -23,16 +22,16 @@ class ViewModel{
         return UITableViewCell()
     })
     
-    init() {
-        symbols = loadSymbols()
+    init(dataSource: RxTableViewSectionedAnimatedDataSource<SectionModel>) {
+        self.datasource = dataSource
         let timerSeq = Observable<Int>.timer(0, period: 5, scheduler: MainScheduler.instance).map { $0 as AnyObject }
         let variableSeq = value.asObservable().throttle(0.5, scheduler: MainScheduler.instance).map { $0 as AnyObject }
         Observable<AnyObject>.merge([timerSeq,variableSeq])
             .subscribe{ _ in
-            self.fethCurrencies(base: self.base.value)
-        }.disposed(by: bag)
-
+                self.fethCurrencies(base: self.base.value)
+            }.disposed(by: bag)
     }
+
     
     func fethCurrencies(base : String){
         let provider = MoyaProvider<ApiService>()
@@ -40,7 +39,7 @@ class ViewModel{
             .subscribe(onSuccess: { (response) in
             if (response.statusCode == 200){
                 if let document = try? response.mapObject(CurrencyResponse.self){
-                    self.processItems([Currency(name:base,value: self.value.value)] + document.rates)
+                    self.processItems([Currency(name:base, subtitle: CurrencyResponse.symbols[base],value: self.value.value)] + document.rates)
                 } else {
                     print("Can't make document")
                 }
@@ -53,6 +52,7 @@ class ViewModel{
     }
 
     func processItems(_ newItems: [Currency]){
+
         for value in newItems{
             if let index = self.currencies.value.index(of: value){
                 if (self.currencies.value[index].name.elementsEqual(base.value)){
@@ -66,13 +66,5 @@ class ViewModel{
         }
     }
     
-    func loadSymbols() -> Dictionary<String, String>{
-        if let path = Bundle.main.path(forResource: "symbols", ofType: "plist"),
-            let dict = NSDictionary(contentsOfFile: path),
-            let dictionary = dict as? Dictionary<String, String>{
-                return dictionary
-        }
-        return [:]
-    }
 }
 

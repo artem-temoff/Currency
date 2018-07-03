@@ -41,6 +41,7 @@ class CurrencyCell: UITableViewCell {
         value.placeholder = "0"
         value.textAlignment = .right
         contentView.addSubview(value)
+        value.delegate = self
         
     }
     
@@ -71,4 +72,17 @@ class CurrencyCell: UITableViewCell {
     
 }
 
-
+extension CurrencyCell : UITextFieldDelegate{
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        if let text = textField.text, text.count > 1{
+            if (text.contains(".") && string.contains(".")){
+                return false
+            }
+        }
+        return true
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        textField.sizeToFit()
+    }
+}

@@ -16,9 +16,24 @@ class ViewController: UIViewController {
 
     let bag = DisposeBag()
     var tmpBug : DisposeBag? = DisposeBag()
-    private var tableView : UITableView!
+    var tableView : UITableView!
     var viewModel : ViewModel!
     var subscription : Disposable?
+    
+    var dataSource = RxTableViewSectionedAnimatedDataSource<SectionModel>(configureCell: { ds,tv,ip,item  in
+        let cell = tv.dequeueReusableCell(withIdentifier: "cell", for: ip) as! CurrencyCell
+        cell.title.text = item.name
+        item.value.asObservable().bind(to: cell.value.rx.text).disposed(by: item.bag)
+        cell.img.image =  UIImage(named: item.name)
+        cell.subtitle.text = item.subtitle
+        cell.selectionStyle = .none
+        return cell
+    })
+    
+    lazy var dataModel: ViewModel = {
+        let vm = ViewModel(dataSource: dataSource)
+        return vm
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,41 +42,26 @@ class ViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
-
-        viewModel = ViewModel()
-        viewModel?.datasource.configureCell = { ds,tv,ip,item  in
-            let cell = tv.dequeueReusableCell(withIdentifier: "cell", for: ip) as! CurrencyCell
-            cell.title.text = item.name
-            item.value.asObservable().bind(to: cell.value.rx.text).disposed(by: self.bag)
-            cell.value.delegate = self
-            cell.img.image =  UIImage(named: item.name)
-            cell.subtitle.text = self.viewModel.symbols?[item.name] ?? ""
-            cell.selectionStyle = .none
-            return cell
-        }
+        dataModel.currencies.asObservable()
+            .map({ [SectionModel(header:"",items:$0)] })
+            .bind(to: tableView.rx.items(dataSource: dataSource))
+            .disposed(by: bag)
         
-        if let ds = viewModel?.datasource {
-            viewModel.currencies.asObservable()
-                .map({ [SectionModel(header:"",items:$0)] })
-                .bind(to: tableView.rx.items(dataSource: ds))
-                .disposed(by: bag)
-        }
-
         tableView.delegate = self
         
         tableView.rx.modelSelected(Currency.self)
             .subscribe{ element in
-            if let element = element.element, let row = self.viewModel.currencies.value.index(of: element){
+            if let element = element.element, let row = self.dataModel.currencies.value.index(of: element){
                let cell = (self.tableView?.cellForRow(at: IndexPath(row: row, section: 0)) as! CurrencyCell)
                 self.subscription = cell.value.rx.text
                     .subscribe( onNext : { element in
                     if let element = element{
-                        self.viewModel.value.value = element
+                        self.dataModel.value.value = element
                     }
                 })
                cell.value.becomeFirstResponder()
-               self.viewModel.currencies.value.swapAt(0, row)
-               self.viewModel.base.value = self.viewModel.currencies.value[0].name
+               self.dataModel.currencies.value.swapAt(0, row)
+               self.dataModel.base.value = self.dataModel.currencies.value[0].name
                 DispatchQueue.main.async {
                     self.tableView.scrollToRow(at: IndexPath(row:0,section:0), at: UITableViewScrollPosition.top, animated: true)
                 }
@@ -78,6 +78,7 @@ class ViewController: UIViewController {
     
     func setupUI() {
         tableView = UITableView()
+        tableView.accessibilityIdentifier = "tableView"
         tableView.register(CurrencyCell.self, forCellReuseIdentifier: "cell")
         view.addSubview(tableView)
         
@@ -108,19 +109,6 @@ extension ViewController : UITableViewDelegate{
     }
 }
 
-extension ViewController : UITextFieldDelegate{
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        if let text = textField.text, text.count > 1{
-            if (text.contains(".") && string.contains(".")){
-                return false
-            }
-        }
-        return true
-    }
-    
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        textField.sizeToFit()
-    }
-}
+
 
 
